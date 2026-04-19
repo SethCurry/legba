@@ -30,18 +30,17 @@ func newState() state {
 	vp.SetContent("Welcome!")
 	vp.KeyMap.Left.SetEnabled(false)
 	vp.KeyMap.Right.SetEnabled(false)
-	ta.KeyMap.InsertNewline.SetEnabled(false)
 
 	return state{
 		chatViewport: vp,
 		chatInput:    ta,
-		messages:     []string{},
+		messages:     []ChatItem{},
 	}
 }
 
 type state struct {
 	chatViewport viewport.Model
-	messages     []string
+	messages     []ChatItem
 	chatInput    textarea.Model
 }
 
@@ -57,8 +56,11 @@ func (s state) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		s.chatViewport.SetHeight(msg.Height - s.chatInput.Height())
 
 		if len(s.messages) > 0 {
-			// Wrap content before setting it.
-			s.chatViewport.SetContent(lipgloss.NewStyle().Width(s.chatViewport.Width()).Render(strings.Join(s.messages, "\n")))
+			lines := []string{}
+			for _, message := range s.messages {
+				lines = append(lines, message.ToLines()...)
+			}
+			s.chatViewport.SetContent(lipgloss.NewStyle().Width(s.chatViewport.Width()).Render(strings.Join(lines, "\n")))
 		}
 		s.chatViewport.GotoBottom()
 		return s, nil
@@ -73,9 +75,13 @@ func (s state) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			return s, tea.Quit
 
-		case "enter":
-			s.messages = append(s.messages, s.chatInput.Value())
-			s.chatViewport.SetContent(lipgloss.NewStyle().Width(s.chatViewport.Width()).Render(strings.Join(s.messages, "\n")))
+		case "ctrl+n":
+			s.messages = append(s.messages, TextChatMessage{Role: "user", Text: s.chatInput.Value()})
+			lines := []string{}
+			for _, message := range s.messages {
+				lines = append(lines, message.ToLines()...)
+			}
+			s.chatViewport.SetContent(lipgloss.NewStyle().Width(s.chatViewport.Width()).Render(strings.Join(lines, "\n")))
 			s.chatInput.Reset()
 			s.chatViewport.GotoBottom()
 			return s, nil
