@@ -24,6 +24,19 @@ func NewChatViewport() ChatViewport {
 	}
 }
 
+func splitMessageAtWidth(message string, width int) []string {
+	lines := []string{}
+	for _, line := range strings.Split(message, "\n") {
+		if len(line) > width {
+			lines = append(lines, line[:width])
+			lines = append(lines, line[width:])
+		} else {
+			lines = append(lines, line)
+		}
+	}
+	return lines
+}
+
 func (c ChatViewport) Update(msg tea.Msg) (ChatViewport, tea.Cmd) {
 	var cmd tea.Cmd
 	c.Model, cmd = c.Model.Update(msg)
@@ -32,7 +45,9 @@ func (c ChatViewport) Update(msg tea.Msg) (ChatViewport, tea.Cmd) {
 		c.messages = append(c.messages, TextChatMessage{Message: ollama.Message{Role: "user", Content: msg.Message}})
 		lines := []string{}
 		for _, message := range c.messages {
-			lines = append(lines, message.ToLines()...)
+			for _, line := range message.ToLines() {
+				lines = append(lines, splitMessageAtWidth(line, c.Width())...)
+			}
 		}
 		c.SetContent(lipgloss.NewStyle().Width(c.Width()).Render(strings.Join(lines, "\n")))
 		return c, cmd
@@ -40,7 +55,9 @@ func (c ChatViewport) Update(msg tea.Msg) (ChatViewport, tea.Cmd) {
 		c.messages = append(c.messages, TextChatMessage{Message: msg.Message})
 		lines := []string{}
 		for _, message := range c.messages {
-			lines = append(lines, message.ToLines()...)
+			for _, line := range message.ToLines() {
+				lines = append(lines, splitMessageAtWidth(line, c.Width())...)
+			}
 		}
 		c.SetContent(lipgloss.NewStyle().Width(c.Width()).Render(strings.Join(lines, "\n")))
 		return c, cmd
