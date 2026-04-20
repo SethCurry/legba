@@ -1,25 +1,28 @@
 package ui
 
-import "strings"
+import (
+	"strings"
+
+	ollama "github.com/ollama/ollama/api"
+)
 
 type ChatItem interface {
 	ToLines() []string
 }
 
 type TextChatMessage struct {
-	Role string
-	Text string
+	ollama.Message
 }
 
 func (m TextChatMessage) ToLines() []string {
 	firstPrefix := "[" + m.Role + "] "
 	numDots := len(firstPrefix)
-	dots := strings.Repeat(".", 10-numDots)
+	dots := strings.Repeat(".", numDots-1) + " "
 
-	origLines := strings.Split(m.Text, "\n")
+	origLines := strings.Split(m.Content, "\n")
 	numLines := len(origLines)
 	lines := make([]string, numLines)
-	for idx, line := range strings.Split(m.Text, "\n") {
+	for idx, line := range origLines {
 		if idx == 0 {
 			lines[idx] = firstPrefix + line
 		} else {

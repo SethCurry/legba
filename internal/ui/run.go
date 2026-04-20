@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	"charm.land/bubbles/v2/cursor"
@@ -8,24 +9,10 @@ import (
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	ollama "github.com/ollama/ollama/api"
 )
 
 func newState() state {
-	ta := textarea.New()
-	ta.Placeholder = "Ask me anything..."
-	ta.SetVirtualCursor(false)
-	ta.Focus()
-
-	ta.Prompt = ">"
-	ta.SetWidth(30)
-	ta.SetHeight(3)
-
-	s := ta.Styles()
-	s.Focused.CursorLine = lipgloss.NewStyle()
-	ta.SetStyles(s)
-
-	ta.ShowLineNumbers = false
-
 	vp := viewport.New(viewport.WithWidth(30), viewport.WithHeight(5))
 	vp.SetContent("Welcome!")
 	vp.KeyMap.Left.SetEnabled(false)
@@ -33,7 +20,7 @@ func newState() state {
 
 	return state{
 		chatViewport: vp,
-		chatInput:    ta,
+		chatInput:    NewChatInput(),
 		messages:     []ChatItem{},
 	}
 }
@@ -41,7 +28,7 @@ func newState() state {
 type state struct {
 	chatViewport viewport.Model
 	messages     []ChatItem
-	chatInput    textarea.Model
+	chatInput    ChatInput
 }
 
 func (s state) Init() tea.Cmd {
@@ -50,6 +37,10 @@ func (s state) Init() tea.Cmd {
 
 func (s state) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.KeyboardEnhancementsMsg:
+		fmt.Println("we got a keyboard enhancement msg")
+		fmt.Println(msg.Flags)
+		return s, nil
 	case tea.WindowSizeMsg:
 		s.chatViewport.SetWidth(msg.Width)
 		s.chatInput.SetWidth(msg.Width)
@@ -76,7 +67,7 @@ func (s state) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return s, tea.Quit
 
 		case "ctrl+n":
-			s.messages = append(s.messages, TextChatMessage{Role: "user", Text: s.chatInput.Value()})
+			s.messages = append(s.messages, TextChatMessage{Message: ollama.Message{Role: "user", Content: s.chatInput.Value()}})
 			lines := []string{}
 			for _, message := range s.messages {
 				lines = append(lines, message.ToLines()...)
