@@ -36,6 +36,14 @@ func (c ChatViewport) Update(msg tea.Msg) (ChatViewport, tea.Cmd) {
 		}
 		c.SetContent(lipgloss.NewStyle().Width(c.Width()).Render(strings.Join(lines, "\n")))
 		return c, cmd
+	case AIResponseMsg:
+		c.messages = append(c.messages, TextChatMessage{Message: msg.Message})
+		lines := []string{}
+		for _, message := range c.messages {
+			lines = append(lines, message.ToLines()...)
+		}
+		c.SetContent(lipgloss.NewStyle().Width(c.Width()).Render(strings.Join(lines, "\n")))
+		return c, cmd
 	case tea.WindowSizeMsg:
 		c.SetWidth(msg.Width)
 		return c, cmd

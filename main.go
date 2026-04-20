@@ -51,7 +51,16 @@ func main() {
 				Name:  "agent",
 				Usage: "Run an agent",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return ui.Run()
+					cfg, err := legba.LoadConfig()
+					if err != nil {
+						return err
+					}
+
+					ollamaClient, err := cfg.Providers.Ollama.Client()
+					if err != nil {
+						return err
+					}
+					return ui.Run(ollamaClient)
 				},
 			},
 		},

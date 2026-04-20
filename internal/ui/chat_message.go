@@ -6,6 +6,10 @@ import (
 	ollama "github.com/ollama/ollama/api"
 )
 
+type AIResponseMsg struct {
+	ollama.Message
+}
+
 type ChatItem interface {
 	ToLines() []string
 }
