@@ -6,6 +6,10 @@ import (
 	"charm.land/lipgloss/v2"
 )
 
+type UserSubmitMsg struct {
+	Message string
+}
+
 type ChatInput struct {
 	textarea.Model
 }
@@ -32,15 +36,29 @@ func NewChatInput() ChatInput {
 }
 
 func (c ChatInput) Update(msg tea.Msg) (ChatInput, tea.Cmd) {
+	collector := newCmdCollector()
 	var cmd tea.Cmd
 	c.Model, cmd = c.Model.Update(msg)
+	collector.Add(cmd)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		c.SetWidth(msg.Width)
 		return c, cmd
+	case tea.KeyPressMsg:
+		switch msg.String() {
+		case "ctrl+n":
+			currentValue := c.Model.Value()
+			collector.Add(func() tea.Msg {
+				return UserSubmitMsg{Message: currentValue}
+			})
+			c.Reset()
+			return c, collector.Collect()
+		}
+		return c, collector.Collect()
+
 	}
 
-	return c, cmd
+	return c, collector.Collect()
 }
 
 func (c ChatInput) Init() tea.Cmd {
