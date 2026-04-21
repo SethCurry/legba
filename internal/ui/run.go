@@ -7,6 +7,7 @@ import (
 	"charm.land/bubbles/v2/textarea"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/SethCurry/legba/internal/ui/events"
 	ollama "github.com/ollama/ollama/api"
 )
 
@@ -69,7 +70,7 @@ func (s state) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return s, collector.Collect()
 
-	case UserSubmitMsg:
+	case events.UserSubmitMsg:
 		collector.Add(func() tea.Msg {
 			responses := []ollama.Message{}
 			err := s.ollamaClient.Chat(context.Background(), &ollama.ChatRequest{
@@ -90,7 +91,7 @@ func (s state) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, v := range responses {
 				fullMessage += v.Content
 			}
-			return AIResponseMsg{Message: ollama.Message{Role: "assistant", Content: fullMessage}}
+			return events.AIResponseMsg{Message: ollama.Message{Role: "assistant", Content: fullMessage}}
 		})
 
 	// Is it a key press?

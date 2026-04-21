@@ -4,11 +4,8 @@ import (
 	"charm.land/bubbles/v2/textarea"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/SethCurry/legba/internal/ui/events"
 )
-
-type UserSubmitMsg struct {
-	Message string
-}
 
 type ChatInput struct {
 	textarea.Model
@@ -49,7 +46,7 @@ func (c ChatInput) Update(msg tea.Msg) (ChatInput, tea.Cmd) {
 		case "ctrl+n":
 			currentValue := c.Model.Value()
 			collector.Add(func() tea.Msg {
-				return UserSubmitMsg{Message: currentValue}
+				return events.UserSubmitMsg{Message: currentValue}
 			})
 			c.Reset()
 			return c, collector.Collect()

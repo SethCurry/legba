@@ -6,6 +6,7 @@ import (
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/SethCurry/legba/internal/ui/events"
 	ollama "github.com/ollama/ollama/api"
 )
 
@@ -41,7 +42,7 @@ func (c ChatViewport) Update(msg tea.Msg) (ChatViewport, tea.Cmd) {
 	var cmd tea.Cmd
 	c.Model, cmd = c.Model.Update(msg)
 	switch msg := msg.(type) {
-	case UserSubmitMsg:
+	case events.UserSubmitMsg:
 		c.messages = append(c.messages, TextChatMessage{Message: ollama.Message{Role: "user", Content: msg.Message}})
 		lines := []string{}
 		for _, message := range c.messages {
@@ -51,7 +52,7 @@ func (c ChatViewport) Update(msg tea.Msg) (ChatViewport, tea.Cmd) {
 		}
 		c.SetContent(lipgloss.NewStyle().Width(c.Width()).Render(strings.Join(lines, "\n")))
 		return c, cmd
-	case AIResponseMsg:
+	case events.AIResponseMsg:
 		c.messages = append(c.messages, TextChatMessage{Message: msg.Message})
 		lines := []string{}
 		for _, message := range c.messages {
