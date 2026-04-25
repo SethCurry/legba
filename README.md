@@ -1,44 +1,15 @@
 # legba
 
-FIXME: description
+<picture>
+  <source
+    srcset="doc/legba-logo.png"
+    media="(orientation: portrait)" />
+  <img src="doc/legba-logo.png" alt="Legba logo" style="width:25%" />
+</picture>
+legba is my attempt at creating an MCP server that allows your LLM to learn as you use it.
 
-## Installation
+## Overview
 
-Download from https://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar legba-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2026 FIXME
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-https://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+At a high level, it is a combination of a graph database that stores entities and relationships,
+and a document store that allows exposing and interacting with the graph database through a
+file-like API.
