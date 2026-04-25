@@ -54,7 +54,7 @@
          :headers {"Content-Type" "text/html"}
          :body "Internal Server Error"}))))
 
-(defn run-mcp [port]
+(defn run-server [port]
   (let [mcp-handler (mcp/router [tools/create-entity-type-tool
                                  tools/create-entity-tool
                                  tools/query-entity-types-tool
@@ -72,7 +72,7 @@
         command-name (first arguments)]
     (t/set-min-level! (verbosity-to-log-level (:verbosity options)))
     (case command-name
-      "mcp" (run-mcp (:port options))
+      "server" (run-server (:port options))
       (do (t/log! {:level :error
                    :msg "Unknown command"
                    :data {:command (first arguments)}})
