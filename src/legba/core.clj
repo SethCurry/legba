@@ -3,8 +3,32 @@
             [ring.util.request :refer [path-info]]
             [taoensso.telemere :as t]
             [legba.mcp :as mcp]
-            [legba.tools :as tools])
+            [legba.tools :as tools]
+            [clojure.tools.cli :refer [parse-opts]])
   (:gen-class))
+
+(def cli-options
+  ;; An option with an argument
+  [["-p" "--port PORT" "Port number"
+    :default 3333
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 65536) "Must be a number between 0 and 65536"]]
+   ;; A non-idempotent option (:default is applied first)
+   ["-v" nil "Verbosity level"
+    :id :verbosity
+    :default 0
+    :update-fn inc] ; Prior to 0.4.1, you would have to use:
+   ;; :assoc-fn (fn [m k _] (update-in m [k] inc))
+   ;; A boolean option defaulting to nil
+   ["-h" "--help"]])
+
+(defn verbosity-to-log-level [verbosity]
+  (case verbosity
+    0 :error
+    1 :warn
+    2 :info
+    3 :debug
+    :default :debug))
 
 (defn handler [mcp-handler]
   (fn [request]
@@ -30,10 +54,7 @@
          :headers {"Content-Type" "text/html"}
          :body "Internal Server Error"}))))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (t/set-min-level! :debug)
+(defn run-mcp [port]
   (let [mcp-handler (mcp/router [tools/create-entity-type-tool
                                  tools/create-entity-tool
                                  tools/query-entity-types-tool
@@ -42,5 +63,18 @@
                                  tools/create-relationship-type-tool
                                  tools/create-relationship-tool])
         root-handler (handler mcp-handler)]
-  (run-jetty root-handler {:port 3333
+  (run-jetty root-handler {:port port
                       :join? true})))
+
+(defn -main
+  [& args]
+  (let [{:keys [options arguments summary]} (parse-opts args cli-options)
+        command-name (first arguments)]
+    (t/set-min-level! (verbosity-to-log-level (:verbosity options)))
+    (case command-name
+      "mcp" (run-mcp (:port options))
+      (do (t/log! {:level :error
+                   :msg "Unknown command"
+                   :data {:command (first arguments)}})
+          (println summary)
+          (System/exit 1)))))

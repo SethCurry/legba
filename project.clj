@@ -12,7 +12,8 @@
                  [com.github.seancorfield/next.jdbc "1.3.1070"]
                  [org.postgresql/postgresql "42.7.8"]
                  [hikari-cp/hikari-cp "3.3.0"]
-                 [com.github.seancorfield/honeysql "2.7.1350"]]
+                 [com.github.seancorfield/honeysql "2.7.1350"]
+                 [org.clojure/tools.cli "1.4.256"]]
   :main ^:skip-aot legba.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
