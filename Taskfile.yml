@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+vars:
+  TIMESTAMP:
+    sh: "date -u +%Y-%m-%d_%H-%M-%S"
+
+tasks:
+  psql:
+    desc: Connect to the PostgreSQL database
+    env:
+      PGPASSWORD: legba
+    cmds:
+      - psql -h localhost -p 25654 -U legba -d legba
+  dbdump:
+    env:
+      PGPASSWORD: scurvy
+    cmds:
+      - docker-compose exec pgvector pg_dump -U legba -d legba > local/sql_backup_{{.TIMESTAMP}}.sql
+      - gzip local/sql_backup_{{.TIMESTAMP}}.sql
+  test:
+    cmds:
+      - lein test

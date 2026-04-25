@@ -3,7 +3,7 @@
             [next.jdbc :as jdbc]
             [honey.sql :as sql]
             [taoensso.telemere :as t]
-            [scurvy.json :refer [->json <-json]]
+            [legba.json :refer [->json <-json]]
             [next.jdbc.prepare :as prepare]
             [next.jdbc.result-set :as rs]
             [legba.mcp :as mcp])

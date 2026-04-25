@@ -1,0 +1,12 @@
+services:
+  pgvector:
+    image: "pgvector/pgvector:pg18-trixie"
+    ports:
+      - "25654:5432"
+    environment:
+      POSTGRES_USER: legba
+      POSTGRES_PASSWORD: legba
+      POSTGRES_DB: legba
+    volumes:
+      - ./local/pgvector:/var/lib/postgresql
+    restart: always
