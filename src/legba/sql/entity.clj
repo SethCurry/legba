@@ -1,5 +1,5 @@
 (ns legba.sql.entity
-  (:require [legba.sql.core :refer [Model ->llm-context]]
+  (:require [legba.sql.core :refer [Model]]
             [legba.sql :refer [do-query]]
             [legba.mcp :refer [new-text-content]]))
 
