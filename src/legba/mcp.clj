@@ -40,10 +40,6 @@
       (map? schema) (into {} (map (fn [x] {(first x) (schema-to-schema (second x))}) schema))
       (vector? schema) (into [] (map schema-to-schema schema))
       :else (throw (ex-info (str "Unknown schema: " schema) {:schema schema})))))
-; (def example-tool (create-tool :title :label :description :handler :schema {
-;      :a-field {:type s/Str
-;                :description "A string field"
-;                :required true}})
 
 (defprotocol PTool
   (call-tool [this req-id params])

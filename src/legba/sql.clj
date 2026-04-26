@@ -6,7 +6,8 @@
             [legba.json :refer [->json <-json]]
             [next.jdbc.prepare :as prepare]
             [next.jdbc.result-set :as rs]
-            [legba.mcp :as mcp])
+            [legba.mcp :as mcp]
+            [legba.config :as config])
   (:import [org.postgresql.util PGobject]
            [java.sql PreparedStatement]))
 
@@ -51,7 +52,8 @@
     (<-pgobject v)))
 
 (def datasource-options
-  (let [config {:username "legba" :password "legba" :database "legba" :hostname "localhost" :port 25654}]
+  (let [config config/loaded-config
+        sql-config (:database config)]
     (assoc {:auto-commit        true
             :read-only          false
             :connection-timeout 30000
@@ -63,11 +65,11 @@
             :pool-name          "legba-db-pool"
             :adapter            "postgresql"
             :register-mbeans    false}
-           :username (:username config)
-           :password (:password config)
-           :database-name (:database config)
-           :server-name (:hostname config)
-           :port-number (:port config))))
+           :username (:username sql-config)
+           :password (:password sql-config)
+           :database-name (:database sql-config)
+           :server-name (:hostname sql-config)
+           :port-number (:port sql-config))))
 
 (defonce datasource
   (delay (make-datasource datasource-options)))
