@@ -16,6 +16,8 @@ file-like API.
 
 ## Architecture
 
+The infrastructure looks like this:
+
 ```mermaid
 flowchart TD
   you-->LLM
@@ -23,6 +25,14 @@ flowchart TD
   pgvector[(pgvector)]
   legba-->pgvector
   legba-->LLM
+```
+
+```mermaid
+erDiagram
+  entity_type ||--o{ entity : has_type
+  relationship_type ||--o{ relationship : has_type
+  entity ||--o{ relationship : has_relationship
+  entity ||--o{ document : has_notes
 ```
 
 ## AI Disclaimer
