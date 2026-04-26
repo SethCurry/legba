@@ -27,6 +27,8 @@ flowchart TD
   legba-->LLM
 ```
 
+The data is stored like this:
+
 ```mermaid
 erDiagram
   entity_type ||--o{ entity : has_type

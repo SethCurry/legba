@@ -4,6 +4,8 @@
             [ring.util.request :refer [body-string]]
             [taoensso.telemere :as t]))
 
+(def protocol-version "2025-11-25")
+
 (defn schema-type-to-jsonschema-type [schema-type]
   (t/log! {:level :debug
            :msg "schema-type-to-jsonschema-type"
@@ -143,24 +145,22 @@
   {:status 200
    :headers {"Content-Type" "application/json"}
    :body (->json {:jsonrpc "2.0"
-                                      :id req-id
-                                      :result {:tools (doall (map #(mcp-schema %) tools))}})})
+                  :id req-id
+                  :result {:tools (s/validate [STool] (doall (map #(mcp-schema %) tools)))}})})
 
 (defn initialize-handler [req-id]
-  (t/log! {
-           :level :debug
-           :msg "Got initialize request"
-  })
+  (t/log! {:level :debug
+           :msg "Got initialize request"})
   {:status 200
    :headers {"Content-Type" "application/json"}
    :body (->json {:jsonrpc "2.0"
-                                      :id req-id
-                                      :result {:protocolVersion "2025-11-25"
-                                               :capabilities {:tools {:listChanged false}}
-                                               :serverInfo {:name "Scurvy"
-                                                            :title "Scurvy Knowledgebase"
-                                                            :version "0.0.1"
-                                                            :description "A knowledgebase for your agent"}}})})
+                  :id req-id
+                  :result {:protocolVersion protocol-version
+                           :capabilities {:tools {:listChanged false}}
+                           :serverInfo {:name "Legba"
+                                        :title "Legba Knowledgebase"
+                                        :version "0.0.1"
+                                        :description "A knowledgebase for your agent"}}})})
 
 (defn new-text-content [text]
   {:type "text"
@@ -185,11 +185,17 @@
       {:status 200
        :headers {"Content-Type" "application/json"}
        :body (->json {:jsonrpc "2.0"
-                                          :id req-id
-                                          :result {:content result
-                                                   :isError false}})})))
+                      :id req-id
+                      :result {:content result
+                               :isError false}})})))
 
-(defrecord ToolHandler [mcp-info handler])
+(defn handle-tool-call [req-id rpc tools]
+  (let [validated-params (s/validate ToolCallRequest rpc)
+        result (tool-call-handler req-id (:params validated-params) tools)]
+    (t/log! {:level :debug
+             :msg "Tool call result"
+             :data {:result result}})
+    result))
 
 (defn router [tools]
   (fn [req]
@@ -203,13 +209,18 @@
         (case method
           "initialize" (initialize-handler req-id)
           "tools/list" (list-tools-handler req-id tools)
-          "tools/call" (tool-call-handler req-id (:params rpc) tools)
+          "tools/call" (let [validated-params (s/validate ToolCallRequest rpc)
+                             result (tool-call-handler req-id (:params rpc) tools)]
+                         (t/log! {:level :debug
+                                  :msg "Tool call result"
+                                  :data {:result result}})
+                         (tool-call-handler req-id (:params validated-params) tools))
           "resources/list" {:status 200
                             :body (->json {:jsonrpc "2.0"
-                                                               :id req-id
-                                                               :result {:resources []}})}
+                                           :id req-id
+                                           :result {:resources []}})}
           "notifications/initialized" {:status 200
                                        :body (->json {:jsonrpc "2.0"
-                                                                          :id req-id
-                                                                          :result {:content "Initialized"}})}
+                                                      :id req-id
+                                                      :result {:content "Initialized"}})}
           (throw (ex-info "Unknown method" {:method method})))))))

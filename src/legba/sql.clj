@@ -189,6 +189,12 @@
              :from :relationship_types}
             :unmarshaller unmarshal-relationship-type))
 
+(defn get-relationship-type-by-name [name]
+  (first (do-query {:select [:*]
+                    :from :relationship_types
+                    :where [:= :name name]}
+                   :unmarshaller unmarshal-relationship-type)))
+
 ; id relationship-type-id source-entity-id target-entity-id attributes
 (defrecord Relationship [id relationship-type-id source-entity-id target-entity-id attributes]
   ContextMarshaller
