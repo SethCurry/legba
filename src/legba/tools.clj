@@ -46,17 +46,11 @@
                                   new-entity (sql/create-entity entity-type-id entity-name entity-attributes)]
                               [(mcp/new-text-content (str "Created entity \"" entity-name "\" with ID " (:id new-entity)))]))
                           {:entity-type {:type s/Str
-                                            :description "The name of the entity type to create the entity for"}
+                                         :description "The name of the entity type to create the entity for"}
                            :name {:type s/Str
                                   :description "The name of the entity to create"}
                            :attributes {:type s/Str
                                         :description "The attributes of the entity to create"}}))
-
-(defn- entity-to-string [entity]
-  (str "ID: " (:id entity)
-       "\nName: " (:name entity)
-       "\nEntity Type: " (:entity-type-id entity)
-       "\nAttributes: " (:attributes entity)))
 
 (defn- relationship-type-to-string [relationship-type]
   (str "ID: " (:id relationship-type)
@@ -81,13 +75,13 @@
        "\nAttributes: " (:attributes relationship)))
 
 (def query-relationships-tool (mcp/deftool
-                               "query-relationships"
-                               "Query Relationships"
-                               "Query all relationships."
-                               (fn [req-id params]
-                                 (let [relationships (sql/query-relationships)]
-                                   [(mcp/new-text-content (str "Found relationships: " (apply str (doall (map relationship-to-string relationships)))))]))
-                               {}))
+                                "query-relationships"
+                                "Query Relationships"
+                                "Query all relationships."
+                                (fn [req-id params]
+                                  (let [relationships (sql/query-relationships)]
+                                    [(mcp/new-text-content (str "Found relationships: " (apply str (doall (map relationship-to-string relationships)))))]))
+                                {}))
 
 (def create-relationship-type-tool (mcp/deftool
                                      "create-relationship-type"
@@ -120,12 +114,12 @@
                                                                   {}
                                                                   relationship-attributes-raw)
                                         new-relationship (sql/create-relationship relationship-type-id source-entity-id target-entity-id relationship-attributes)]
-                                  [(mcp/new-text-content (str "Created relationship with ID " (:id new-relationship)))]))
+                                    [(mcp/new-text-content (str "Created relationship with ID " (:id new-relationship)))]))
                                 {:relationship-type-id {:type s/Int
                                                         :description "The ID of the relationship type to create the relationship for"}
                                  :source-entity-id {:type s/Int
-                                                     :description "The ID of the source entity to create the relationship for"}
+                                                    :description "The ID of the source entity to create the relationship for"}
                                  :target-entity-id {:type s/Int
-                                                     :description "The ID of the target entity to create the relationship for"}
+                                                    :description "The ID of the target entity to create the relationship for"}
                                  :attributes {:type s/Str
                                               :description "The attributes of the relationship to create"}}))
