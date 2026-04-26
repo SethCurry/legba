@@ -1,6 +1,5 @@
 (ns legba.sql.entity
-  (:require [legba.sql.core :refer [Model]]
-            [legba.sql :refer [do-query]]
+  (:require [legba.sql.core :refer [Model do-query]]
             [legba.mcp :refer [new-text-content]]))
 
 (defrecord Entity [id entity-type-id name attributes]

@@ -114,7 +114,7 @@
   {:name s/Str
    :title s/Str
    :description s/Str
-   :inputSchema {s/Str s/Any}})
+   :inputSchema {s/Keyword s/Any}})
 
 (s/defschema ToolListRequest
   "A request to list tools."

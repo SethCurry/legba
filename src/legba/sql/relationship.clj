@@ -1,6 +1,5 @@
 (ns legba.sql.relationship
-  (:require [legba.sql.core :refer [Model]]
-            [legba.sql :refer [do-query]]
+  (:require [legba.sql.core :refer [Model do-query]]
             [legba.mcp :refer [new-text-content]]))
 
 

@@ -97,7 +97,7 @@
     (is (= 1 (:id body)))
     (is (= "2025-11-25" (get-in body [:result :protocolVersion])))
     (is (= false (get-in body [:result :capabilities :tools :listChanged])))
-    (is (= "Scurvy" (get-in body [:result :serverInfo :name])))))
+    (is (= "Legba" (get-in body [:result :serverInfo :name])))))
 
 (deftest tool-call-handler-test
   (let [tool (mcp/deftool "double" "Double" "doubles n"

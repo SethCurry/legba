@@ -1,6 +1,5 @@
 (ns legba.sql.document
-  (:require [legba.sql.core :refer [Model]]
-            [legba.sql :refer [do-query]]
+  (:require [legba.sql.core :refer [Model do-query]]
             [legba.mcp :refer [new-text-content]]))
 
 (defrecord Document [id name description content created-at updated-at entity-id]
