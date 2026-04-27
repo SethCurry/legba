@@ -2,7 +2,8 @@
   (:require [schema.core :as s]
             [legba.json :refer [->json <-json]]
             [ring.util.request :refer [body-string]]
-            [taoensso.telemere :as t]))
+            [taoensso.telemere :as t]
+            [legba.jsonrpc :refer [jsonrpc-schema]]))
 
 (def protocol-version "2025-11-25")
 
@@ -81,10 +82,8 @@
 ;}
 (s/defschema InitializeRequest
   "Initializes the MCP server."
-  {:jsonrpc s/Str
-   :id s/Int
-   :method s/Str
-   :params {s/Keyword s/Any}})
+  (jsonrpc-schema {:method s/Str
+                   :params {s/Keyword s/Any}}))
 
 ; {
 ;  "jsonrpc": "2.0",
@@ -105,9 +104,8 @@
 ;}
 (s/defschema InitializeResponse
   "Initializes the MCP server."
-  {:jsonrpc s/Str
-   :id s/Int
-   :result {s/Keyword s/Any}})
+  (jsonrpc-schema {
+                   :result {s/Keyword s/Any}}))
 
 (s/defschema STool
   "A tool that can be used to perform an action."
@@ -118,28 +116,24 @@
 
 (s/defschema ToolListRequest
   "A request to list tools."
-  {:jsonrpc s/Str
-   :id s/Int
-   :method s/Str}) ; always "tools/list"
+  (jsonrpc-schema {
+                   :method s/Str})) ; always "tools/list"
 
 (s/defschema ToolListResponse
   "A response to a tool list request."
-  {:jsonrpc s/Str
-   :id s/Int
-   :result {:result [STool]}})
+  (jsonrpc-schema {
+                   :result {:result [STool]}}))
 
 (s/defschema ToolCallRequest
   "A request to call a tool."
-  {:jsonrpc s/Str
-   :id s/Int
-   :method s/Str ; always "tools/call"
-   :params {s/Keyword s/Any}})
+  (jsonrpc-schema {
+                   :method s/Str ; always "tools/call"
+                   :params {s/Keyword s/Any}}))
 
 (s/defschema ToolCallResponse
   "A response to a tool call."
-  {:jsonrpc s/Str
-   :id s/Int
-   :result {s/Keyword s/Any}})
+  (jsonrpc-schema {
+                   :result {s/Keyword s/Any}}))
 
 (defn list-tools-handler [req-id tools]
   {:status 200

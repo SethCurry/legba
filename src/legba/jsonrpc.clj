@@ -15,6 +15,6 @@
            :error error}))
 
 (defn jsonrpc-schema [schema]
-  (->json {:jsonrpc version
-           :id s/Int
-           :result schema}))
+  (assoc schema
+         :jsonrpc version
+         :id s/Int))

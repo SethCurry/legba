@@ -8,6 +8,8 @@
             [legba.sql.relationship :as relationship]
             [legba.sql.document :as document]))
 
+(s/defschema SListedAttribute {:name s/Str
+                               :value s/Any})
 
 (def create-entity-type-tool (mcp/deftool
                                "create-entity-type"
@@ -54,7 +56,7 @@
                                          :description "The name of the entity type to create the entity for"}
                            :name {:type s/Str
                                   :description "The name of the entity to create"}
-                           :attributes {:type s/Str
+                           :attributes {:type [SListedAttribute]
                                         :description "The attributes of the entity to create"}}))
 
 (defn- relationship-type-to-string [rt]
