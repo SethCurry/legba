@@ -1,12 +1,11 @@
 (ns legba.tools
   (:require [legba.mcp :as mcp]
-            [legba.sql :as sql]
             [schema.core :as s]
+            [legba.sql.core :refer [->llm-context]]
             [legba.sql.entity :as entity]
             [legba.sql.entity-type :as entity-type]
             [legba.sql.relationship-type :as relationship-type]
-            [legba.sql.relationship :as relationship]
-            [legba.sql.document :as document]))
+            [legba.sql.relationship :as relationship]))
 
 (s/defschema SListedAttribute {:name s/Str
                                :value s/Any})
@@ -23,10 +22,6 @@
                                        :description "The name of the entity type to create"}
                                 :description {:type s/Str
                                               :description "The description of the entity type to create"}}))
-(defn- entity-type-to-string [et]
-  (str "ID: " (:id et)
-       "\nName: " (:name et)
-       "\nDescription: " (:description et)))
 
 (def query-entity-types-tool (mcp/deftool
                                "query-entity-types"
@@ -34,7 +29,7 @@
                                "Query all entity types."
                                (fn [req-id params]
                                  (let [entity-types (entity-type/query-entity-types)]
-                                   [(mcp/new-text-content (str "Found entity types: " (apply str (doall (map entity-type-to-string entity-types)))))]))
+                                   [(doall (map ->llm-context entity-types))]))
                                {}))
 
 (def create-entity-tool (mcp/deftool
@@ -59,27 +54,15 @@
                            :attributes {:type [SListedAttribute]
                                         :description "The attributes of the entity to create"}}))
 
-(defn- relationship-type-to-string [rt]
-  (str "ID: " (:id rt)
-       "\nName: " (:name rt)
-       "\nBidirectional: " (:bidirectional rt)
-       "\nDescription: " (:description rt)))
-
 (def query-relationship-types-tool (mcp/deftool
                                      "query-relationship-types"
                                      "Query Relationship Types"
                                      "Query all relationship types."
                                      (fn [req-id params]
                                        (let [relationship-types (relationship-type/query-relationship-types)]
-                                         [(mcp/new-text-content (str "Found relationship types: " (apply str (doall (map relationship-type-to-string relationship-types)))))]))
+                                         [(doall (map ->llm-context relationship-types))]))
                                      {}))
 
-(defn- relationship-to-string [rtsp]
-  (str "ID: " (:id rtsp)
-       "\nRelationship Type: " (:relationship-type-id rtsp)
-       "\nSource Entity: " (:source-entity-id rtsp)
-       "\nTarget Entity: " (:target-entity-id rtsp)
-       "\nAttributes: " (:attributes rtsp)))
 
 (def query-relationships-tool (mcp/deftool
                                 "query-relationships"
@@ -87,7 +70,7 @@
                                 "Query all relationships."
                                 (fn [req-id params]
                                   (let [relationships (relationship/query-relationships)]
-                                    [(mcp/new-text-content (str "Found relationships: " (apply str (doall (map relationship-to-string relationships)))))]))
+                                    [(doall (map ->llm-context relationships))]))
                                 {}))
 
 (def create-relationship-type-tool (mcp/deftool

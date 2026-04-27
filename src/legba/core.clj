@@ -1,10 +1,12 @@
 (ns legba.core
-  (:require [ring.adapter.jetty :refer [run-jetty]]
-            [ring.util.request :refer [path-info]]
-            [taoensso.telemere :as t]
-            [legba.mcp :as mcp]
-            [legba.tools :as tools]
-            [clojure.tools.cli :refer [parse-opts]])
+  (:require
+   [clojure.tools.cli :refer [parse-opts]]
+   [legba.mcp :as mcp]
+   [legba.sql.entity :as entity]
+   [legba.tools :as tools]
+   [ring.adapter.jetty :refer [run-jetty]]
+   [ring.util.request :refer [path-info]]
+   [taoensso.telemere :as t])
   (:gen-class))
 
 (def cli-options
@@ -73,6 +75,8 @@
     (t/set-min-level! (verbosity-to-log-level (:verbosity options)))
     (case command-name
       "server" (run-server (:port options))
+      "list" (case (second arguments)
+               "entities" (entity/query-entities))
       (do (t/log! {:level :error
                    :msg "Unknown command"
                    :data {:command (first arguments)}})
