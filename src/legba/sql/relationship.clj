@@ -1,17 +1,19 @@
 (ns legba.sql.relationship
-  (:require [legba.sql.core :refer [Model do-query]]
+  (:require [legba.sql.core :refer [Model do-query ->cli]]
             [legba.mcp :refer [new-text-content]]))
 
 
 ; id relationship-type-id source-entity-id target-entity-id attributes
 (defrecord Relationship [id relationship-type-id source-entity-id target-entity-id attributes]
   Model
-  (->llm-context [this]
-    (new-text-content (str "ID: " (:id this)
+  (->cli [this]
+    (str "ID: " (:id this)
                                "\nRelationship Type: " (:relationship-type-id this)
                                "\nSource Entity ID: " (:source-entity-id this)
                                "\nTarget Entity ID: " (:target-entity-id this)
-                               "\nAttributes: " (:attributes this)))))
+                               "\nAttributes: " (:attributes this)))
+  (->llm-context [this]
+    (new-text-content (->cli this))))
 
 (defn- unmarshal-relationship [x]
   (Relationship. (:relationships/id x)

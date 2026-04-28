@@ -27,8 +27,12 @@
   (let [description (or (:description schema) "")
         type (:type schema)]
     (cond
-      (not (nil? type)) {:type (schema-type-to-jsonschema-type type)
-                         :description description}
+      (not (nil? type)) (if (vector? type)
+                          {:type "array"
+                           :items {:type (schema-to-jsonschema (first type))}
+                           :description description}
+                          {:type (schema-type-to-jsonschema-type type)
+                           :description description})
       (map? schema) {:type "object"
                      :properties (into {} (map (fn [x] {(first x) (schema-to-jsonschema (second x))}) schema))
                      :required (keys schema)}

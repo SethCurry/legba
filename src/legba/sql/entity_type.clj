@@ -1,14 +1,16 @@
 (ns legba.sql.entity-type
-  (:require [legba.sql.core :refer [Model do-query]]
+  (:require [legba.sql.core :refer [Model do-query ->cli]]
             [legba.mcp :refer [new-text-content]]))
 
 
 (defrecord EntityType [id name description]
   Model
-  (->llm-context [this]
-     (new-text-content (str "ID: " (:id this)
+  (->cli [this]
+     (str "ID: " (:id this)
                                 "\nName: " (:name this)
-                                "\nDescription: " (:description this)))))
+                                "\nDescription: " (:description this)))
+  (->llm-context [this]
+    (new-text-content (->cli this))))
 
 (defn- unmarshal-entity-type [x] (EntityType. (:entity_types/id x) (:entity_types/name x) (:entity_types/description x)))
 

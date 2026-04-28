@@ -1,17 +1,19 @@
 (ns legba.sql.document
-  (:require [legba.sql.core :refer [Model do-query]]
+  (:require [legba.sql.core :refer [Model do-query ->cli]]
             [legba.mcp :refer [new-text-content]]))
 
 (defrecord Document [id name description content created-at updated-at entity-id]
   Model
-  (->llm-context [this]
-    (new-text-content (str "ID: " (:id this)
+  (->cli [this]
+    (str "ID: " (:id this)
                                "\nName: " (:name this)
                                "\nDescription: " (:description this)
                                "\nCreated At: " (:created-at this)
                                "\nUpdated At: " (:updated-at this)
                                "\nEntity ID: " (:entity-id this)
-                               "\nContent: " (:content this)))))
+                               "\nContent: " (:content this)))
+  (->llm-context [this]
+    (new-text-content (->cli this))))
 
 (defn- unmarshal-document [x] (Document. (:documents/id x)
                                          (:documents/name x)

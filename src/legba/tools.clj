@@ -51,7 +51,10 @@
                                          :description "The name of the entity type to create the entity for"}
                            :name {:type s/Str
                                   :description "The name of the entity to create"}
-                           :attributes {:type [SListedAttribute]
+                           :attributes {:type [{:name {:type s/Str
+                                                    :description "The name of the attribute"}
+                                                :value {:type s/Str
+                                                        :description "The value of the attribute"}}]
                                         :description "The attributes of the entity to create"}}))
 
 (def query-relationship-types-tool (mcp/deftool

@@ -51,8 +51,8 @@
     (<-pgobject v)))
 
 (def datasource-options
-  (let [config config/loaded-config
-        sql-config (:database config)]
+  (let [cfg @config/loaded-config
+        sql-config (:database cfg)]
     (assoc {:auto-commit        true
             :read-only          false
             :connection-timeout 30000
@@ -103,4 +103,5 @@
     (raw-query formatted-query :unmarshaller unmarshaller)))
 
 (defprotocol Model 
-  (->llm-context [this]))
+  (->llm-context [this])
+  (->cli [this]))

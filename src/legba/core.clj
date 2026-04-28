@@ -6,7 +6,8 @@
    [legba.tools :as tools]
    [ring.adapter.jetty :refer [run-jetty]]
    [ring.util.request :refer [path-info]]
-   [taoensso.telemere :as t])
+   [taoensso.telemere :as t]
+   [legba.cli :refer [execute-cli]])
   (:gen-class))
 
 (def cli-options
@@ -70,15 +71,4 @@
 
 (defn -main
   [& args]
-  (let [{:keys [options arguments summary]} (parse-opts args cli-options)
-        command-name (first arguments)]
-    (t/set-min-level! (verbosity-to-log-level (:verbosity options)))
-    (case command-name
-      "server" (run-server (:port options))
-      "list" (case (second arguments)
-               "entities" (entity/query-entities))
-      (do (t/log! {:level :error
-                   :msg "Unknown command"
-                   :data {:command (first arguments)}})
-          (println summary)
-          (System/exit 1)))))
+  (execute-cli args))

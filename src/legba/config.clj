@@ -1,7 +1,8 @@
 (ns legba.config
   (:require [clojure.java.io :as io]
             [legba.json :refer [<-json]]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [taoensso.telemere :as t]))
 
 (s/defschema Config
   "A configuration for the Legba server."
@@ -21,7 +22,9 @@
   keyword keys. With no args, reads the default ~/.config/legba/config.json"
   ([] (read-config (config-file)))
   ([path]
-   (<-json (io/file path) :schema Config)))
+   (let [parsed-config (<-json (io/file path) :schema Config)]
+     (t/log! {:level :debug :msg "Parsed config" :data {:parsed-config parsed-config}})
+     parsed-config)))
 
 
 (defonce loaded-config

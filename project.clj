@@ -14,7 +14,8 @@
                  [hikari-cp/hikari-cp "3.3.0"]
                  [com.github.seancorfield/honeysql "2.7.1350"]
                  [cli-matic "0.5.4"]
-                 [org.clojure/tools.cli "1.4.256"]]
+                 [org.clojure/tools.cli "1.4.256"]
+                 [org.slf4j/slf4j-nop "2.0.17"]]
   :main ^:skip-aot legba.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

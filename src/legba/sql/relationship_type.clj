@@ -1,16 +1,18 @@
 (ns legba.sql.relationship-type
-  (:require [legba.sql.core :refer [Model do-query]]
+  (:require [legba.sql.core :refer [Model do-query ->cli]]
             [legba.mcp :refer [new-text-content]]))
 
 
 ; id name bidirectional description
 (defrecord RelationshipType [id name bidirectional description]
   Model
-  (->llm-context [this]
-    (new-text-content (str "ID: " (:id this)
+  (->cli [this]
+    (str "ID: " (:id this)
                                "\nName: " (:name this)
                                "\nBidirectional: " (:bidirectional this)
-                               "\nDescription: " (:description this)))))
+                               "\nDescription: " (:description this)))
+  (->llm-context [this]
+    (new-text-content (->cli this))))
 
 (defn- unmarshal-relationship-type [x] (RelationshipType.
                                         (:relationship_types/id x)
