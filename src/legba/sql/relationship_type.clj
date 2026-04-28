@@ -21,12 +21,12 @@
                                         (:relationship_types/description x)))
 
 (defn create-relationship-type [name bidirectional description]
-  (do-query {:insert-into :relationship_types
+  (first (do-query {:insert-into :relationship_types
              :values [{:name name
                        :bidirectional bidirectional
                        :description description}]
              :returning :id}
-            :unmarshaller (fn [x] (RelationshipType. (:relationship_types/id x) name bidirectional description))))
+            :unmarshaller (fn [x] (RelationshipType. (:relationship_types/id x) name bidirectional description)))))
 
 (defn query-relationship-types []
   (do-query {:select [:*]

@@ -23,14 +23,14 @@
                  (:relationships/attributes x)))
 
 (defn create-relationship [relationship-type-id source-entity-id target-entity-id attributes]
-  (do-query {:insert-into :relationships
+  (first (do-query {:insert-into :relationships
              :values [{:relationship_type_id relationship-type-id
                        :source_entity_id source-entity-id
                        :target_entity_id target-entity-id
                        :attributes [:param :relationship-attributes]}]
              :returning :id}
             :unmarshaller (fn [x] (Relationship. (:relationships/id x) relationship-type-id source-entity-id target-entity-id attributes))
-            :opts {:params {:relationship-attributes attributes}}))
+            :opts {:params {:relationship-attributes attributes}})))
 
 (defn query-relationships []
   (do-query {:select [:*]

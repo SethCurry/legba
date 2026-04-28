@@ -19,13 +19,13 @@
            (:entities/attributes x)))
 
 (defn create-entity [entity-type-id name attributes]
-  (do-query {:insert-into :entities
+  (first (do-query {:insert-into :entities
              :values [{:entity_type_id entity-type-id
                        :name name
                        :attributes [:param :entity-attributes]}]
              :returning :id}
             :unmarshaller (fn [x] (Entity. (:entities/id x) entity-type-id name attributes))
-            :opts {:params {:entity-attributes attributes}}))
+            :opts {:params {:entity-attributes attributes}})))
 
 (defn query-entities []
   (do-query {:select [:*]

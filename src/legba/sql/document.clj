@@ -24,14 +24,14 @@
                                          (:documents/entity-id x)))
 
 (defn create-document [name description content entity-id]
-  (do-query {:insert-into :documents
+  (first (do-query {:insert-into :documents
              :values [{:name name
                        :description description
                        :content content
                        :entity_id entity-id}]
              :returning :id}
             :unmarshaller (fn [x] (Document. (:documents/id x) name description content (java.util.Date.) (java.util.Date.) entity-id))
-            :opts {:params {:created-at (java.util.Date.)}}))
+            :opts {:params {:created-at (java.util.Date.)}})))
 
 (defn query-documents []
   (do-query {:select [:*]
