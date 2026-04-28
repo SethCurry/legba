@@ -69,6 +69,7 @@
     ""))
 
 (defn create-entity-type [{:keys [name description]}]
+  ; TODO: Ensure that name and description are not nil or empty strings
   (let [new-entity-type (entity-type/create-entity-type name description)]
     (println (->cli new-entity-type))
     ""))

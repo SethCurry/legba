@@ -22,3 +22,6 @@ tasks:
   test:
     cmds:
       - lein test
+  todo:
+    cmds:
+      - rg --iglob=!Taskfile.yml TODO
