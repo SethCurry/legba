@@ -8,7 +8,8 @@
             [clojure.string :refer [lower-case]]
             [legba.sql.entity-type :as entity-type]
             [legba.sql.core :refer [->cli]]
-            [legba.cli.flags :refer [flags]]))
+            [legba.cli.flags :refer [flags]]
+            [legba.sql.entity :as entity]))
 
 (defn verbosity-to-log-level [verbosity]
   (case (lower-case verbosity)
@@ -63,10 +64,29 @@
   (run-jetty root-handler {:port port
                       :join? true})))
 
+(defn print-models [models]
+  (doall (map (fn [x] (println (->cli x))) models))
+  "")
+
 (defn list-entity-types [{}]
+  (println "Entity Types:")
   (let [entity-types (entity-type/query-entity-types)]
-    (doall (map (fn [x] (println (->cli x))) entity-types))
-    ""))
+    (print-models entity-types)))
+
+(defn create-entity [{:keys [entity-type-name name]}]
+  (println "Creating entity:")
+  (println "Entity Type Name:" entity-type-name)
+  (println "Name:" name)
+  (let [found-entity-type (entity-type/get-entity-type-by-name entity-type-name)
+        entity-type-id (:id found-entity-type)
+        parsed-attributes {}
+        new-entity (entity/create-entity entity-type-id name parsed-attributes)]
+    (println (->cli new-entity))))
+
+(defn list-entities [{}]
+  (println "Entities:")
+  (let [entities (entity/query-entities)]
+    (print-models entities)))
 
 (defn create-entity-type [{:keys [name description]}]
   ; TODO: Ensure that name and description are not nil or empty strings
@@ -91,20 +111,37 @@
                                                :description "List all entity types"
                                                :examples ["java -jar legba.jar list-entity-types"]
                                                :runs (create-command-handler list-entity-types)
+                                               :opts (flags [])}
+                                              {:command "entities"
+                                               :description "List all entities"
+                                               :examples ["java -jar legba.jar list-entities"]
+                                               :runs (create-command-handler list-entities)
                                                :opts (flags [])}]}
                                {:command "create"
                                 :subcommands [{:command "entity-type"
-                                :description "Create a new entity type"
-                                :examples ["java -jar legba.jar create-entity-type --name 'Person' --description 'A person'"]
-                                :runs (create-command-handler create-entity-type)
-                                :opts (flags [{:as "The name of the entity type to create"
-                                               :option "name"
-                                               :type :string
-                                               :required true}
-                                              {:as "The description of the entity type to create"
-                                               :option "description"
-                                               :type :string
-                                               :required true}])}]}]})
+                                               :description "Create a new entity type"
+                                               :examples ["java -jar legba.jar create-entity-type --name 'Person' --description 'A person'"]
+                                               :runs (create-command-handler create-entity-type)
+                                               :opts (flags [{:as "The name of the entity type to create"
+                                                              :option "name"
+                                                              :type :string
+                                                              :required true}
+                                                             {:as "The description of the entity type to create"
+                                                              :option "description"
+                                                              :type :string
+                                                              :required true}])}
+                                              {:command "entity"
+                                               :description "Create a new entity"
+                                               :examples ["java -jar legba.jar create-entity --entity-type-name 'Person' --name 'John Doe'"]
+                                               :runs (create-command-handler create-entity)
+                                               :opts (flags [{:as "The name of the entity type to create the entity for"
+                                                              :option "entity-type-name"
+                                                              :type :string
+                                                              :required true}
+                                                             {:as "The name of the entity to create"
+                                                              :option "name"
+                                                              :type :string
+                                                              :required true}])}]}]})
 
 (defn execute-cli [args]
   (run-cmd args cli-config))
