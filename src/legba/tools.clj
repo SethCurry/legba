@@ -7,14 +7,11 @@
             [legba.sql.relationship-type :as relationship-type]
             [legba.sql.relationship :as relationship]))
 
-(s/defschema SListedAttribute {:name s/Str
-                               :value s/Any})
-
 (def create-entity-type-tool (mcp/deftool
                                "create-entity-type"
                                "Create Entity Type"
                                "Creates a new entity"
-                               (fn [req-id params] (let [entity-type-name (:name params)
+                               (fn [_ params] (let [entity-type-name (:name params)
                                                          entity-type-description (:description params)
                                                          new-entity-type (entity-type/create-entity-type entity-type-name entity-type-description)]
                                                      [(mcp/new-text-content (str "Created entity type \"" entity-type-name "\" with ID " (:id new-entity-type)))]))
@@ -27,7 +24,7 @@
                                "query-entity-types"
                                "Query Entity Types"
                                "Query all entity types."
-                               (fn [req-id params]
+                               (fn [_ _]
                                  (let [entity-types (entity-type/query-entity-types)]
                                    [(doall (map ->llm-context entity-types))]))
                                {}))
@@ -36,7 +33,7 @@
                           "create-entity"
                           "Create entity"
                           "Create a new entity to track a specific instance of an entity type such as a person, team, application, or anything else."
-                          (fn [req-id params]
+                          (fn [_ params]
                             (let [entity-type-name (:entity-type params)
                                   found-entity-type (entity-type/get-entity-type-by-name entity-type-name)
                                   entity-type-id (:id found-entity-type)
@@ -61,7 +58,7 @@
                                      "query-relationship-types"
                                      "Query Relationship Types"
                                      "Query all relationship types."
-                                     (fn [req-id params]
+                                     (fn [_ _]
                                        (let [relationship-types (relationship-type/query-relationship-types)]
                                          [(doall (map ->llm-context relationship-types))]))
                                      {}))
@@ -71,7 +68,7 @@
                                 "query-relationships"
                                 "Query Relationships"
                                 "Query all relationships."
-                                (fn [req-id params]
+                                (fn [_ _]
                                   (let [relationships (relationship/query-relationships)]
                                     [(doall (map ->llm-context relationships))]))
                                 {}))
@@ -80,7 +77,7 @@
                                      "create-relationship-type"
                                      "Create Relationship Type"
                                      "Create a new relationship type to track a specific relationship between two entities."
-                                     (fn [req-id params]
+                                     (fn [_ params]
                                        (let [relationship-type-name (:name params)
                                              relationship-type-bidirectional (:bidirectional params)
                                              relationship-type-description (:description params)
@@ -98,7 +95,7 @@
                                 "create-relationship"
                                 "Create Relationship"
                                 "Create a new relationship between two entities."
-                                (fn [req-id params]
+                                (fn [_ params]
                                   (let [relationship-type-id (:relationship-type-id params)
                                         source-entity-id (:source-entity-id params)
                                         target-entity-id (:target-entity-id params)

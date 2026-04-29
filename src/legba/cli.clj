@@ -7,7 +7,8 @@
             [taoensso.telemere :as t]
             [clojure.string :refer [lower-case]]
             [legba.sql.entity-type :as entity-type]
-            [legba.sql.core :refer [->cli]]))
+            [legba.sql.core :refer [->cli]]
+            [legba.cli.flags :refer [flags]]))
 
 (defn verbosity-to-log-level [verbosity]
   (case (lower-case verbosity)
@@ -77,35 +78,33 @@
                  :command "legba"
                  :description "A memory system for your AI"
                  :version "0.0.1"
-                 :opts [{:as "The level to log at"
-                         :default "info"
-                         :option "verbosity"
-                         :type :string}]
                  :subcommands [{:command "server"
                                 :description "Start the Legba server"
                                 :examples ["java -jar legba.jar server --port 3017"]
-                                :opts [{:as "The port to listen on"
-                                        :default 3333
-                                        :option "port"
-                                        :type :int}]
+                                :opts (flags [{:as "The port to listen on"
+                                               :default 3333
+                                               :option "port"
+                                               :type :int}])
                                 :runs (create-command-handler run-server)}
-                               {:command "list-entity-types"
-                                :description "List all entity types"
-                                :examples ["java -jar legba.jar list-entity-types"]
-                                :runs (create-command-handler list-entity-types)}
-                               {:command "create-entity-type"
+                               {:command "list"
+                                :subcommands [{:command "entity-types"
+                                               :description "List all entity types"
+                                               :examples ["java -jar legba.jar list-entity-types"]
+                                               :runs (create-command-handler list-entity-types)
+                                               :opts (flags [])}]}
+                               {:command "create"
+                                :subcommands [{:command "entity-type"
                                 :description "Create a new entity type"
                                 :examples ["java -jar legba.jar create-entity-type --name 'Person' --description 'A person'"]
                                 :runs (create-command-handler create-entity-type)
-                                :opts [{:as "The name of the entity type to create"
-                                        :option "name"
-                                        :type :string
-                                        :required true}
-                                       {:as "The description of the entity type to create"
-                                        :option "description"
-                                        :type :string
-                                        :required true}]}]
-})
+                                :opts (flags [{:as "The name of the entity type to create"
+                                               :option "name"
+                                               :type :string
+                                               :required true}
+                                              {:as "The description of the entity type to create"
+                                               :option "description"
+                                               :type :string
+                                               :required true}])}]}]})
 
 (defn execute-cli [args]
   (run-cmd args cli-config))

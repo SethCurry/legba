@@ -54,8 +54,8 @@
 
 (defrecord Tool [handler mcp-info schema]
   PTool
-  (call-tool [this req-id params] (handler req-id (s/validate schema params)))
-  (mcp-schema [this] mcp-info))
+  (call-tool [_ req-id params] (handler req-id (s/validate schema params)))
+  (mcp-schema [_] mcp-info))
 
 (defn deftool [name title description handler raw-schema]
   (Tool. handler
