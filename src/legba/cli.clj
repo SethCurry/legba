@@ -10,7 +10,8 @@
             [legba.sql.core :refer [->cli]]
             [legba.sql.relationship-type :as relationship-type]
             [legba.cli.flags :refer [flags]]
-            [legba.sql.entity :as entity]))
+            [legba.sql.entity :as entity]
+            [legba.sql.relationship :as relationship]))
 
 (defn verbosity-to-log-level [verbosity]
   (case (lower-case verbosity)
@@ -108,6 +109,20 @@
     (println (->cli new-entity-type))
     ""))
 
+(defn list-relationships [{}]
+  (println "Relationships:")
+  (let [relationships (relationship/query-relationships)]
+    (print-models relationships)))
+
+(defn create-relationship [{:keys [relationship-type-id source-entity-id target-entity-id attributes]}]
+  (println "Creating relationship:")
+  (println "Relationship Type ID:" relationship-type-id)
+  (println "Source Entity ID:" source-entity-id)
+  (println "Target Entity ID:" target-entity-id)
+  (println "Attributes:" attributes)
+  (let [new-relationship (relationship/create-relationship relationship-type-id source-entity-id target-entity-id attributes)]
+    (println (->cli new-relationship))))
+
 (def cli-config {
                  :command "legba"
                  :description "A memory system for your AI"
@@ -135,6 +150,11 @@
                                                :description "List all relationship types"
                                                :examples ["java -jar legba.jar list-relationship-types"]
                                                :runs (create-command-handler list-relationship-types)
+                                               :opts (flags [])}
+                                              {:command "relationships"
+                                               :description "List all relationships"
+                                               :examples ["java -jar legba.jar list-relationships"]
+                                               :runs (create-command-handler list-relationships)
                                                :opts (flags [])}]}
                                {:command "create"
                                 :subcommands [{:command "entity-type"
@@ -175,6 +195,26 @@
                                                               :default false}
                                                              {:as "The description of the relationship type to create"
                                                               :option "description"
+                                                              :type :string
+                                                              :required true}])}
+                                              {:command "relationship"
+                                               :description "Create a new relationship"
+                                               :examples ["java -jar legba.jar create-relationship --relationship-type-id 1 --source-entity-id 1 --target-entity-id 2 --attributes '{\"name\": \"John Doe\"}'"]
+                                               :runs (create-command-handler create-relationship)
+                                               :opts (flags [{:as "The ID of the relationship type to create the relationship for"
+                                                              :option "relationship-type-id"
+                                                              :type :int
+                                                              :required true}
+                                                             {:as "The ID of the source entity to create the relationship for"
+                                                              :option "source-entity-id"
+                                                              :type :int
+                                                              :required true}
+                                                             {:as "The ID of the target entity to create the relationship for"
+                                                              :option "target-entity-id"
+                                                              :type :int
+                                                              :required true}
+                                                             {:as "The attributes of the relationship to create"
+                                                              :option "attributes"
                                                               :type :string
                                                               :required true}])}]}]})
 
