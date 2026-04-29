@@ -8,6 +8,7 @@
             [clojure.string :refer [lower-case]]
             [legba.sql.entity-type :as entity-type]
             [legba.sql.core :refer [->cli]]
+            [legba.sql.relationship-type :as relationship-type]
             [legba.cli.flags :refer [flags]]
             [legba.sql.entity :as entity]))
 
@@ -88,6 +89,19 @@
   (let [entities (entity/query-entities)]
     (print-models entities)))
 
+(defn create-relationship-type [{:keys [name bidirectional description]}]
+  (println "Creating relationship type:")
+  (println "Name:" name)
+  (println "Bidirectional:" bidirectional)
+  (println "Description:" description)
+  (let [new-relationship-type (relationship-type/create-relationship-type name bidirectional description)]
+    (println (->cli new-relationship-type))))
+
+(defn list-relationship-types [{}]
+  (println "Relationship Types:")
+  (let [relationship-types (relationship-type/query-relationship-types)]
+    (print-models relationship-types)))
+
 (defn create-entity-type [{:keys [name description]}]
   ; TODO: Ensure that name and description are not nil or empty strings
   (let [new-entity-type (entity-type/create-entity-type name description)]
@@ -116,6 +130,11 @@
                                                :description "List all entities"
                                                :examples ["java -jar legba.jar list-entities"]
                                                :runs (create-command-handler list-entities)
+                                               :opts (flags [])}
+                                              {:command "relationship-types"
+                                               :description "List all relationship types"
+                                               :examples ["java -jar legba.jar list-relationship-types"]
+                                               :runs (create-command-handler list-relationship-types)
                                                :opts (flags [])}]}
                                {:command "create"
                                 :subcommands [{:command "entity-type"
@@ -140,6 +159,22 @@
                                                               :required true}
                                                              {:as "The name of the entity to create"
                                                               :option "name"
+                                                              :type :string
+                                                              :required true}])}
+                                              {:command "relationship-type"
+                                               :description "Create a new relationship type"
+                                               :examples ["java -jar legba.jar create-relationship-type --name 'Friend' --bidirectional true --description 'A friend relationship'"]
+                                               :runs (create-command-handler create-relationship-type)
+                                               :opts (flags [{:as "The name of the relationship type to create"
+                                                              :option "name"
+                                                              :type :string
+                                                              :required true}
+                                                             {:as "Whether the relationship is bidirectional"
+                                                              :option "bidirectional"
+                                                              :type :boolean
+                                                              :default false}
+                                                             {:as "The description of the relationship type to create"
+                                                              :option "description"
                                                               :type :string
                                                               :required true}])}]}]})
 
