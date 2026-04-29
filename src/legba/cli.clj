@@ -1,7 +1,6 @@
 (ns legba.cli
   (:require [cli-matic.core :refer [run-cmd]]
             [legba.mcp :as mcp]
-            [legba.sql.entity :as entity]
             [legba.tools :as tools]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.util.request :refer [path-info]]
