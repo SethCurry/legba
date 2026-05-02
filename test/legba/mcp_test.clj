@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [jsonista.core :as json]
             [schema.core :as s]
-            [legba.mcp :as mcp]))
+            [legba.llm.mcp :as mcp]))
 
 (defn- json-req [body-map]
   {:body (java.io.ByteArrayInputStream.

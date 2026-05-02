@@ -1,4 +1,4 @@
-(ns legba.mcp
+(ns legba.llm.mcp
   (:require [schema.core :as s]
             [legba.json :refer [->json <-json]]
             [ring.util.request :refer [body-string]]

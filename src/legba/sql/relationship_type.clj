@@ -1,6 +1,6 @@
 (ns legba.sql.relationship-type
   (:require [legba.sql.core :refer [Model do-query ->cli]]
-            [legba.mcp :refer [new-text-content]]))
+            [legba.llm.mcp :refer [new-text-content]]))
 
 
 ; id name bidirectional description

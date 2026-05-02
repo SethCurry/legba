@@ -1,5 +1,5 @@
 (ns legba.tools
-  (:require [legba.mcp :as mcp]
+  (:require [legba.llm.mcp :as mcp]
             [schema.core :as s]
             [legba.sql.core :refer [->llm-context]]
             [legba.sql.entity :as entity]

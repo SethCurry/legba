@@ -1,6 +1,6 @@
 (ns legba.sql.entity-type
   (:require [legba.sql.core :refer [Model do-query ->cli]]
-            [legba.mcp :refer [new-text-content]]))
+            [legba.llm.mcp :refer [new-text-content]]))
 
 
 (defrecord EntityType [id name description]
