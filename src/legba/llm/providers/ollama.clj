@@ -217,6 +217,7 @@
 
      (get-headers {:token \"my-secret-token\"})
      ;; => {\"Content-Type\" \"application/json\" \"Authorization\" \"Bearer my-secret-token\"}"
+  [options]
   (when (not (malli/validate ClientOptions options))
     (throw (Exception. (str "Invalid options: " options)))
     (let [
@@ -250,6 +251,7 @@
 
      (get-base-url {:base-url \"http://remote-server.example.com:11434\"})
      ;; => \"http://remote-server.example.com:11434\""
+  [options]
   (if (:base-url options)
     (:base-url options)
     default-base-url))
@@ -281,6 +283,7 @@
               {:model \"nomic-embed-text\" :input \"Hello\"}
               {:base-url \"http://localhost:11434\"})
      ;; => {:status 200, :body \"{\\\"model\\\":\\\"nomic-embed-text\\\",...}\", ...}"
+  [path body options]
   (let [headers (get-headers options)
         base-url (get-base-url options)
         url (str base-url path)]
@@ -310,6 +313,7 @@
    EXAMPLE:
      (do-get \"/api/tags\" {:base-url \"http://localhost:11434\"})
      ;; => {:status 200, :body \"{\\\"models\\\": [...]}\", ...}"
+  [path options]
   (let [headers (get-headers options)
         base-url (get-base-url options)
         url (str base-url path)]

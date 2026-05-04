@@ -39,10 +39,8 @@ erDiagram
 
 ## AI Disclaimer
 
-AI is used in this project, however primarily for unit testing (that likely
-would not exist otherwise, because I am a bad test writer).
+This project does use AI to generate code, because I believe it's necessary to dogfood your own product.
 
-All code in this repo has been thoroughly human-reviewed, and the vast
-majority of code in the binaries is human-written.  If I find an AI workflow
-I like, I will update this, but as of now I am not a fan of the results of
-agentic AI on substantial codebases that need strong data consistency guarantees.
+The overall architecture is human-designed.
+AI code is reviewed, and the dominant use is for documentation and unit testing, but AI is used.
+The AI prompts are generally small and targeted ("write a function that does X", "add comments to Y in the following format...").
