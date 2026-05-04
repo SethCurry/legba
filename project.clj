@@ -15,6 +15,7 @@
                  [com.github.seancorfield/honeysql "2.7.1350"]
                  [cli-matic "0.5.4"]
                  [http-kit "2.3.0"]
+                 [metosin/malli "0.20.1"]
                  [org.clojure/tools.cli "1.4.256"]
                  [org.slf4j/slf4j-nop "2.0.17"]]
   :main ^:skip-aot legba.core
