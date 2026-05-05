@@ -6,7 +6,6 @@
    chat completions. All functions accept an optional options map that can
    specify the base URL and an authentication token."
   (:require [org.httpkit.client :as http-client]
-            [schema.core :as schema]
             [legba.json :refer [->json <-json]]
             [malli.core :as malli]))
 
@@ -43,8 +42,8 @@
      (malli/validate ClientOptions {:invalid-key \"value\"})
      ;; => false (will throw an Exception in callers)"
   [:map
-   [:base-url :maybe :string]
-   [:token :maybe :string]])
+   [:base-url {:optional true} :string]
+   [:token {:optional true} :string]])
 
 (def Model
   "Schema for a model returned by Ollama's /api/tags endpoint.
@@ -81,8 +80,8 @@
    [:modified_at :string]
    [:size :int]
    [:digest :string]
-   [:remote_model :maybe :string]
-   [:remote_host :maybe :string]
+   [:remote_model {:optional true} :string]
+   [:remote_host {:optional true} :string]
    [:details [:map
                [:format :string]
                [:family :string]
@@ -151,12 +150,12 @@
   [:map
    [:model :string]
    [:input :string]
-   [:dimensions :maybe :int]
-   [:keep_alive :maybe :string]
-   [:options :maybe [:map
-                      [:seed :maybe :int]
-                      [:temperature :maybe :num]
-                      [:num_ctx :maybe :int]]]])
+   [:dimensions {:optional true} :int]
+   [:keep_alive {:optional true} :string]
+   [:options {:optional true} [:map
+                      [:seed {:optional true} :int]
+                      [:temperature {:optional true} :num]
+                      [:num_ctx {:optional true} :int]]]])
 
 (def EmbedResponse
   "Schema for the response from the Ollama /api/embeddings endpoint.
@@ -463,8 +462,8 @@
      ;; => true"
   [:map
    [:name :string]
-   [:description :maybe :string]
-   [:args [:map :string :any]]])
+   [:description {:optional true} :string]
+   [:args [:map [::malli/default [:map-of :string :any]]]]])
 
 (def Tool
   "Schema for a tool definition in a chat request.
@@ -489,10 +488,10 @@
    [:type :string]
    [:function [:map
                 [:name :string]
-                [:description :maybe :string]
+                [:description {:optional true} :string]
                 [:parameters [:map [::malli/default [:map-of :string :any]]]]]]])
 
-(schema/defschema ChatMessage
+(def ChatMessage
   "A message in a chat request.
 
    WHAT: Defines the structure of an individual message within a chat
@@ -519,13 +518,13 @@
         :content \"Look at this image\"
         :images [\"base64encodedimagedata\"]})
      ;; => true"
-  {:role schema/Str
-   :content schema/Str
-   (schema/optional-key :images) [schema/Str]
-   (schema/optional-key :tool_calls) [ToolCall]
-  })
+  [:map
+   [:role :string]
+   [:content :string]
+   [:images {:optional true} [:vector :string]]
+   [:tool_calls {:optional true} [:vector ToolCall]]])
 
-(schema/defschema ChatRequest
+(def ChatRequest
   "A request to generate a chat response from Ollama.
 
    WHAT: Defines the full structure of a chat completions request,
@@ -557,16 +556,18 @@
         :options {:temperature 0.7
                   :num_ctx 4096}})
      ;; => true"
-  {:model schema/Str
-   :messages [ChatMessage]
-   :tools [Tool]
-   (schema/optional-key :options) {(schema/optional-key :seed) schema/Int
-                                   (schema/optional-key :temperature) schema/Num
-                                   (schema/optional-key :num_ctx) schema/Int}
-   (schema/optional-key :stream) schema/Bool
-   (schema/optional-key :thinking) schema/Bool})
+  [:map
+   [:model :string]
+   [:messages [:vector ChatMessage]]
+   [:tools {:optional true} [:vector Tool]]
+   [:options {:optional true} [:map
+                     [:seed {:optional true} :int]
+                     [:temperature {:optional true} :float]
+                     [:num_ctx {:optional true} :int]]]
+   [:stream {:optional true} :bool]
+   [:thinking {:optional true} :bool]])
 
-(schema/defschema ChatMessageResponse
+(def ChatMessageResponse
   "A message in a chat response from Ollama.
 
    WHAT: Defines the structure of an assistant message returned from a
@@ -593,14 +594,14 @@
         :content \"Let me think about this...\"
         :thinking \"Paris is the capital because...\"})
      ;; => true"
-  {:role schema/Str
-   :content schema/Str
-   (schema/optional-key :thinking) schema/Str
-   (schema/optional-key :images) [schema/Str]
-   (schema/optional-key :tool_calls) [ToolCall]
-  })
+  [:map
+   [:role :string]
+   [:content :string]
+   [:thinking {:optional true} :string]
+   [:images {:optional true} [:vector :string]]
+   [:tool_calls {:optional true} [:vector ToolCall]]])
 
-(schema/defschema ChatResponse
+(def ChatResponse
   "A complete response from the /api/chat endpoint.
 
    WHAT: Defines the full structure of a chat completions response from
@@ -631,23 +632,26 @@
         :eval_count 8
         :eval_duration 15000000})
      ;; => true"
-  {:model schema/Str
-   :created_at schema/Str
-   :messages [ChatMessageResponse]
-   :total_duration schema/Int
-   :load_duration schema/Int
-   :prompt_eval_count schema/Int
-   :prompt_eval_duration schema/Int
-   :eval_count schema/Int
-   :eval_duration schema/Int
-   (schema/optional-key :logprobs) {:token schema/Str
-                                    :logprob schema/Num
-                                    :bytes [schema/Int]
-                                    :top_logprobs [{:token schema/Str
-                                                     :logprob schema/Num
-                                                     :bytes [schema/Int]}]}
-   (schema/optional-key :done) schema/Bool
-   (schema/optional-key :done_reason) schema/Str})
+  [:map
+   [:model :string]
+   [:created_at :string]
+   [:messages [:vector ChatMessageResponse]]
+   [:total_duration :int]
+   [:load_duration :int]
+   [:prompt_eval_count :int]
+   [:prompt_eval_duration :int]
+   [:eval_count :int]
+   [:eval_duration :int]
+   [:logprobs {:optional true} [:map
+                     [:token :string]
+                     [:logprob :float]
+                     [:bytes [:vector :int]]
+                     [:top_logprobs [:vector [:map
+                                              [:token :string]
+                                              [:logprob :float]
+                                              [:bytes [:vector :int]]]]]]]
+   [:done {:optional true} :bool]
+   [:done_reason {:optional true} :string]])
 
 (defn chat
   "Generate a chat response from a given request.
@@ -717,6 +721,10 @@
      ;; => {:model \"llama3.1:latest\" :messages [...] ...}"
   ([request] (chat request {:base-url default-base-url}))
   ([request options]
-   (let [body (schema/validate ChatRequest request)
-         response (do-post "/api/chat" body options)]
-     (schema/validate ChatResponse (<-json (:body response) :schema ChatResponse)))))
+   (when (not (malli/validate ChatRequest request))
+     (throw (Exception. (str "Invalid request: " request))))
+   (let [response (do-post "/api/chat" request options)
+         body (<-json (:body response))]
+     (when (not (malli/validate ChatResponse body))
+       (throw (Exception. (str "Invalid response: " body))))
+     body)))

@@ -16,5 +16,5 @@
 
 (defn jsonrpc-schema [schema]
   (assoc schema
-         :jsonrpc version
+         :jsonrpc s/Str
          :id s/Int))
