@@ -8,12 +8,11 @@
 ;; Fields:
 ;;   :id          - The unique database identifier for the document.
 ;;   :name        - A short, human-readable name for the document.
-;;   :description - A longer description summarizing what the document contains.
 ;;   :content     - The full body/text of the document.
 ;;   :created-at  - The Date/DateTime when the document was first created.
 ;;   :updated-at  - The Date/DateTime when the document was last modified.
 ;;   :entity-id   - The ID of the Entity this document is associated with.
-(defrecord Document [id name description content created-at updated-at entity-id]
+(defrecord Document [id name content created-at updated-at entity-id]
   Model
 
   ;; Converts this Document into a human-readable CLI string.
@@ -39,12 +38,11 @@
   ;;   ;; => "ID: 1\nName: Meeting Notes\n..."
   (->cli [this]
     (str "ID: " (:id this)
-                               "\nName: " (:name this)
-                               "\nDescription: " (:description this)
-                               "\nCreated At: " (:created-at this)
-                               "\nUpdated At: " (:updated-at this)
-                               "\nEntity ID: " (:entity-id this)
-                               "\nContent: " (:content this)))
+         "\nName: " (:name this)
+         "\nCreated At: " (:created-at this)
+         "\nUpdated At: " (:updated-at this)
+         "\nEntity ID: " (:entity-id this)
+         "\nContent: " (:content this)))
 
   ;; Converts this Document into an LLM-compatible context object.
   ;;
@@ -94,7 +92,6 @@
 (defn- unmarshal-document [x]
   (Document. (:documents/id x)
              (:documents/name x)
-             (:documents/description x)
              (:documents/content x)
              (:documents/created-at x)
              (:documents/updated-at x)
@@ -127,24 +124,33 @@
 ;;     42)
 ;;   ;; => #legba.sql.document.Document{:id 7, :name "Meeting Notes",
 ;;   ;;      :entity-id 42, :created-at #inst "2026-05-01", ...}
-(defn create-document [name description content entity-id]
+(defn create-document [name content entity-id]
   (first
-    (do-query {:insert-into :documents
-               :values [{:name name
-                         :description description
-                         :content content
-                         :entity_id entity-id}]
-               :returning :id}
-              :unmarshaller (fn [x]
-                              (Document. (:documents/id x)
-                                         name
-                                         description
-                                         content
-                                         (java.util.Date.)
-                                         (java.util.Date.)
-                                         entity-id))
-              :opts {:params {:created-at (java.util.Date.)}})))
+   (do-query {:insert-into :documents
+              :values [{:name name
+                        :content content
+                        :entity_id entity-id}]
+              :returning :id}
+             :unmarshaller (fn [x]
+                             (Document. (:documents/id x)
+                                        name
+                                        content
+                                        (java.util.Date.)
+                                        (java.util.Date.)
+                                        entity-id))
+             :opts {:params {:created-at (java.util.Date.)}})))
 
+(defn get-document-by-name [name]
+  (first (do-query {:select :*
+                    :from :documents
+                    :where {:name name}
+                    :unmarshaller unmarshal-document})))
+
+(defn update-document [id name content]
+  (first (do-query {:update :documents
+                    :set {:name name
+                          :content content}
+                    :where {:id id}})))
 ;; Retrieves all Documents from the database.
 ;;
 ;; Why use it:

@@ -5,16 +5,18 @@
             [legba.sql.entity :as entity]
             [legba.sql.entity-type :as entity-type]
             [legba.sql.relationship-type :as relationship-type]
-            [legba.sql.relationship :as relationship]))
+            [legba.sql.relationship :as relationship]
+            [clojure.string :as string]
+            [legba.sql.document :as document]))
 
 (def create-entity-type-tool (mcp/deftool
                                "create-entity-type"
                                "Create Entity Type"
                                "Creates a new entity"
                                (fn [_ params] (let [entity-type-name (:name params)
-                                                         entity-type-description (:description params)
-                                                         new-entity-type (entity-type/create-entity-type entity-type-name entity-type-description)]
-                                                     [(mcp/new-text-content (str "Created entity type \"" entity-type-name "\" with ID " (:id new-entity-type)))]))
+                                                    entity-type-description (:description params)
+                                                    new-entity-type (entity-type/create-entity-type entity-type-name entity-type-description)]
+                                                [(mcp/new-text-content (str "Created entity type \"" entity-type-name "\" with ID " (:id new-entity-type)))]))
                                {:name {:type s/Str
                                        :description "The name of the entity type to create"}
                                 :description {:type s/Str
@@ -49,7 +51,7 @@
                            :name {:type s/Str
                                   :description "The name of the entity to create"}
                            :attributes {:type [{:name {:type s/Str
-                                                    :description "The name of the attribute"}
+                                                       :description "The name of the attribute"}
                                                 :value {:type s/Str
                                                         :description "The value of the attribute"}}]
                                         :description "The attributes of the entity to create"}}))
@@ -62,7 +64,6 @@
                                        (let [relationship-types (relationship-type/query-relationship-types)]
                                          [(doall (map ->llm-context relationship-types))]))
                                      {}))
-
 
 (def query-relationships-tool (mcp/deftool
                                 "query-relationships"
@@ -90,7 +91,6 @@
                                       :description {:type s/Str
                                                     :description "The description of the relationship type to create"}}))
 
-
 (def create-relationship-tool (mcp/deftool
                                 "create-relationship"
                                 "Create Relationship"
@@ -113,3 +113,52 @@
                                                     :description "The ID of the target entity to create the relationship for"}
                                  :attributes {:type s/Str
                                               :description "The attributes of the relationship to create"}}))
+
+(def get-document-tool (mcp/deftool
+                         "get-document"
+                         "Get Document"
+                         "Get a document by name"
+                         (fn [_ params]
+                           (let [name (:name params)
+                                 doc (document/get-document-by-name name)]
+                             [(mcp/new-text-content (->llm-context doc))]))
+                         {:name {:type s/Str
+                                 :description "The name of the document to retrieve"}}))
+
+(def create-document-tool (mcp/deftool
+                            "create-document"
+                            "Create Document"
+                            "Create a new document.  You can use this to store facts or thoughts about a topic, person, pet, team, application, or anything else."
+                            (fn [_ params]
+                              (let [name (:name params)
+                                    content (:content params)
+                                    new-document (document/create-document name content nil)]
+                                [(mcp/new-text-content (str "Created document with ID " (:id new-document)))]))
+                            {:name {:type s/Str
+                                    :description "The name of the document to create"}
+                             :content {:type s/Str
+                                       :description "The content of the document to create"}}))
+
+(def update-document-tool (mcp/deftool
+                            "update-document"
+                            "Update Document"
+                            "Update an existing document"
+                            (fn [_ params]
+                              (let [name (:name params)
+                                    content (:content params)
+                                    found-document (document/get-document-by-name name)]
+                                (document/update-document (:id found-document) name content)
+                                [(mcp/new-text-content (str "Updated document " name))]))
+                            {:name {:type s/Str
+                                    :description "The name of the document to update"}
+                             :content {:type s/Str
+                                       :description "The content of the document to update"}}))
+
+(def list-documents-tool (mcp/deftool
+                           "list-documents"
+                           "List Documents"
+                           "List all documents"
+                           (fn [_ _]
+                             (let [documents (document/query-documents)]
+                               [(mcp/new-text-content (str "Documents: " (string/join "\n\n" (map ->llm-context documents))))]))
+                           {}))

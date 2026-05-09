@@ -23,11 +23,11 @@
 
 (defn- create-command-handler [callable]
   (fn [args]
-  (let [str-log-level (get args :verbosity "info")
-        log-level (verbosity-to-log-level str-log-level)
-        new-args (dissoc args :verbosity)]
-    (t/set-min-level! log-level)
-    (callable new-args))))
+    (let [str-log-level (get args :verbosity "info")
+          log-level (verbosity-to-log-level str-log-level)
+          new-args (dissoc args :verbosity)]
+      (t/set-min-level! log-level)
+      (callable new-args))))
 
 (defn handler [mcp-handler]
   (fn [request]
@@ -55,16 +55,13 @@
 
 (defn run-server [{:keys [port]
                    :or {port 3333}}]
-  (let [mcp-handler (mcp/router [tools/create-entity-type-tool
-                                 tools/create-entity-tool
-                                 tools/query-entity-types-tool
-                                 tools/query-relationship-types-tool
-                                 tools/query-relationships-tool
-                                 tools/create-relationship-type-tool
-                                 tools/create-relationship-tool])
+  (let [mcp-handler (mcp/router [tools/create-document-tool
+                                 tools/update-document-tool
+                                 tools/list-documents-tool
+                                 tools/get-document-tool])
         root-handler (handler mcp-handler)]
-  (run-jetty root-handler {:port port
-                      :join? true})))
+    (run-jetty root-handler {:port port
+                             :join? true})))
 
 (defn print-models [models]
   (doall (map (fn [x] (println (->cli x))) models))
@@ -123,8 +120,7 @@
   (let [new-relationship (relationship/create-relationship relationship-type-id source-entity-id target-entity-id attributes)]
     (println (->cli new-relationship))))
 
-(def cli-config {
-                 :command "legba"
+(def cli-config {:command "legba"
                  :description "A memory system for your AI"
                  :version "0.0.1"
                  :subcommands [{:command "server"
