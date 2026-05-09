@@ -1,9 +1,16 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import {
+  ExtensionAPI,
+  isToolCallEventType,
+} from "@earendil-works/pi-coding-agent";
+import child_process from "child_process";
 
 export default function (pi: ExtensionAPI) {
   pi.on("tool_execution_end", async (event, ctx) => {
-    if (event.toolName === "write" || event.toolName === "edit") {
-      // TODO fix parents
+    if (
+      isToolCallEventType("write", event) ||
+      isToolCallEventType("edit", event)
+    ) {
+      child_process.exec("brepl balance " + event.input.path);
     }
   });
 }
