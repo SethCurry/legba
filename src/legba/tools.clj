@@ -7,7 +7,8 @@
             [legba.sql.relationship-type :as relationship-type]
             [legba.sql.relationship :as relationship]
             [clojure.string :as string]
-            [legba.sql.document :as document]))
+            [legba.sql.document :as document]
+            [taoensso.telemere :as t]))
 
 (def create-entity-type-tool (mcp/deftool
                                "create-entity-type"
@@ -45,6 +46,7 @@
                                                       {}
                                                       entity-attributes-raw)
                                   new-entity (entity/create-entity entity-type-id entity-name entity-attributes)]
+                              (t/log! (str "Created entity" entity-name "with ID" (:id new-entity)))
                               [(mcp/new-text-content (str "Created entity \"" entity-name "\" with ID " (:id new-entity)))]))
                           {:entity-type {:type s/Str
                                          :description "The name of the entity type to create the entity for"}

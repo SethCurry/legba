@@ -58,7 +58,14 @@
   (let [mcp-handler (mcp/router [tools/create-document-tool
                                  tools/update-document-tool
                                  tools/list-documents-tool
-                                 tools/get-document-tool])
+                                 tools/get-document-tool
+                                 tools/create-entity-type-tool
+                                 tools/query-entity-types-tool
+                                 tools/create-entity-tool
+                                 tools/create-relationship-type-tool
+                                 tools/query-relationship-types-tool
+                                 tools/create-relationship-tool
+                                 tools/query-relationships-tool])
         root-handler (handler mcp-handler)]
     (run-jetty root-handler {:port port
                              :join? true})))
