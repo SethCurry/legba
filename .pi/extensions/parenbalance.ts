@@ -10,7 +10,10 @@ export default function (pi: ExtensionAPI) {
       isToolCallEventType("write", event) ||
       isToolCallEventType("edit", event)
     ) {
-      child_process.exec("brepl balance " + event.input.path);
+      if (event.input.path.endsWith(".clj")) {
+        child_process.exec("brepl balance " + event.input.path);
+        ctx.ui.notify("Balanced parens in " + event.input.path);
+      }
     }
   });
 }
