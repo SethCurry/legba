@@ -1,9 +1,9 @@
 (ns legba.llm.mallicp
-  (:require [schema.core :as s]
-            [legba.json :refer [->json <-json]]
-            [ring.util.request :refer [body-string]]
-            [taoensso.telemere :as t]
-            [malli.core :as malli]))
+  (:require
+   [legba.json :refer [->json <-json]]
+   [ring.util.request :refer [body-string]]
+   [taoensso.telemere :as t]
+   [malli.core :as malli]))
 
 (def protocol-version "2025-11-25")
 
@@ -27,9 +27,13 @@
       {key-name {:type (schema-type-to-jsonschema-type item-options-or-type)}})))
 
 (defn schema-to-jsonschema [items]
-  (let [schema-items (into {} (map (fn [x] {(first x) (schema-item-to-jsonschema (second x))}) items))]
+  (println items)
+  (let [schema-items (into {}
+                           (map
+                            schema-item-to-jsonschema
+                            (rest items)))]
     {:type "object"
-     :properties (into {} (map (fn [x] {(first x) (dissoc (second x) :optional)}) schema-items))
+     :properties (into {} (map (fn [x] [(first x) (dissoc (second x) :optional)]) schema-items))
      :required (map (fn [x] (first x))
                     (filter (fn [x] (true? (:optional (second x))))
                             schema-items))}))
@@ -157,7 +161,7 @@
 (defn list-tools-handler [req-id tools]
   (let [response-body {:jsonrpc "2.0"
                        :id req-id
-                       :result {:tools (doall (map #(mcp-schema %) tools))}}]
+                       :result {:tools (doall (map #(schema-to-jsonschema %) tools))}}]
     (validate-or-throw ListToolsResponse response-body)
     {:status 200
      :headers {"Content-Type" "application/json"}
@@ -184,7 +188,7 @@
    :text text})
 
 (defn- find-tool [tools name]
-  (let [tool (first (filter (fn [x] (= (:name (mcp-schema x)) name)) tools))]
+  (let [tool (first (filter (fn [x] (= (:name x) name)) tools))]
     (if (not (nil? tool))
       tool
       (throw (ex-info "Tool not found" {:tool name})))))
@@ -198,7 +202,7 @@
              :data {:tool-name tool-name
                     :args args}})
     (let [tool (find-tool tools tool-name)
-          result (call-tool tool req-id args)]
+          result ((:handler tool) req-id args)]
       {:status 200
        :headers {"Content-Type" "application/json"}
        :body (->json {:jsonrpc "2.0"
