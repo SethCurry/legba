@@ -8,62 +8,31 @@
 (def protocol-version "2025-11-25")
 
 (defn schema-type-to-jsonschema-type [schema-type]
-  (t/log! {:level :debug
-           :msg "schema-type-to-jsonschema-type"
-           :data {:schema-type schema-type}})
-  (let [str-schema-type (str schema-type)]
-    (t/log! {:level :debug
-             :msg "str-schema-type"
-             :data {:str-schema-type str-schema-type}})
-    (cond
-      (identical? schema-type java.lang.String) "string"
-      (identical? schema-type Boolean) "boolean"
-      (identical? schema-type Number) "number"
-      (identical? schema-type Integer) "integer"
-      (identical? schema-type s/Int) "integer"
-      :else (throw (ex-info (str "Unknown schema type: " (class schema-type)) {:schema-type str-schema-type})))))
+  (case schema-type
+    :string "string"
+    :boolean "boolean"
+    (throw (ex-info "Unknown schema type" {:schema-type schema-type}))))
 
-(defn schema-to-jsonschema [schema]
-  (let [description (or (:description schema) "")
-        type (:type schema)]
-    (cond
-      (not (nil? type)) (if (vector? type)
-                          {:type "array"
-                           :items {:type (schema-to-jsonschema (first type))}
-                           :description description}
-                          {:type (schema-type-to-jsonschema-type type)
-                           :description description})
-      (map? schema) {:type "object"
-                     :properties (into {} (map (fn [x] {(first x) (schema-to-jsonschema (second x))}) schema))
-                     :required (keys schema)}
-      (vector? schema) {:type "array"
-                        :items {:type "string"}}
-      :else (throw (ex-info (str "Unknown schema: " schema) {:schema schema})))))
+(defn- schema-item-to-jsonschema [schema-item]
+  (let [key-name (first schema-item)
+        item-options-or-type (second schema-item)
+        has-options (map? item-options-or-type)]
+    (if has-options
+      (let [description (:description item-options-or-type)
+            optional (:optional item-options-or-type)
+            item-type (get schema-item 2)]
+        {key-name {:type (schema-type-to-jsonschema-type item-type)
+                   :description description
+                   :optional optional}})
+      {key-name {:type (schema-type-to-jsonschema-type item-options-or-type)}})))
 
-(defn schema-to-schema [schema]
-  (let [type (:type schema)]
-    (cond
-      (not (nil? type)) type
-      (map? schema) (into {} (map (fn [x] {(first x) (schema-to-schema (second x))}) schema))
-      (vector? schema) (into [] (map schema-to-schema schema))
-      :else (throw (ex-info (str "Unknown schema: " schema) {:schema schema})))))
-
-(defprotocol PTool
-  (call-tool [this req-id params])
-  (mcp-schema [this]))
-
-(defrecord Tool [handler mcp-info schema]
-  PTool
-  (call-tool [_ req-id params] (handler req-id (s/validate schema params)))
-  (mcp-schema [_] mcp-info))
-
-(defn deftool [name title description handler raw-schema]
-  (Tool. handler
-         {:name name
-          :title title
-          :description description
-          :inputSchema (schema-to-jsonschema raw-schema)}
-         (schema-to-schema raw-schema)))
+(defn schema-to-jsonschema [items]
+  (let [schema-items (into {} (map (fn [x] {(first x) (schema-item-to-jsonschema (second x))}) items))]
+    {:type "object"
+     :properties (into {} (map (fn [x] {(first x) (dissoc (second x) :optional)}) schema-items))
+     :required (map (fn [x] (first x))
+                    (filter (fn [x] (true? (:optional (second x))))
+                            schema-items))}))
 
 ; Initialize request
 ;
